@@ -1,5 +1,4 @@
 const Item = require('../models/item');
-const Category = require('../models/category');
 
 //Display list of all Items.
 exports.item_list = function(req, res, next) {
@@ -13,8 +12,18 @@ exports.item_list = function(req, res, next) {
 };
 
 //Display detail page for a specific Item.
-exports.item_detail = function(req, res) {
-    res.send('NI' + req.params.id);
+exports.item_detail = function(req, res, next) {
+    Item.findById(req.params.id)
+        .populate('category')
+        .exec(function(err, item) {
+            if (err) { return next(err); }
+            if (item==null) {
+                const error = new Error('Item not found'); 
+                error.status = 404;
+                return next(error);
+            }
+            res.render('item_detail', {title: 'Musical Instrument: ' +item.name, item: item});
+        });
 };
 
 //Display Item create form on GET.

@@ -2,4 +2,15 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  p Welcome to #[em Musical Instrument Store], a simple inventory of musical instruments for sale.
+
+  h2 Current Inventory
+
+  if error 
+    p Error getting inventory.
+  else 
+    p The inventory has the following record counts: 
+
+    ul 
+      li #[strong Items:] !{data.item_count} 
+      li #[strong Categories:] !{data.category_count} 

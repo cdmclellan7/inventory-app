@@ -1,13 +1,30 @@
 const Category = require('../models/category');
+const Item = require('../models/item');
+
+const async = require('async');
 
 //Display Site Home Page
 exports.index = function(req, res) {
-    res.send('NI: Site Home Page')
+    async.parallel({
+        category_count: function(callback) {
+            Category.countDocuments({}, callback);
+        },
+        item_count: function(callback) {
+            Item.countDocuments({}, callback);
+        }
+    }, function(err, counts) {
+        res.render('index', {title: 'Musical Instrument Store', error: err, data: counts});
+    })
 };
 
 //Display list of all Categories.
-exports.category_list = function(req, res) {
-    res.send('NI');
+exports.category_list = function(req, res, next) {
+    Category.find()
+        .sort([['name', 'ascending']])
+        .exec(function (err, list_categories) {
+            if (err) { return next(err); }
+            res.render('category_list', {title: 'Instrument Family List', category_list: list_categories});
+        });
 };
 
 //Display detail page for a specific Category.

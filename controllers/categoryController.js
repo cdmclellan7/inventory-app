@@ -2,6 +2,7 @@ const Category = require('../models/category');
 const Item = require('../models/item');
 
 const async = require('async');
+const validator = require('express-validator');
 
 //Display Site Home Page
 exports.index = function(req, res) {
@@ -52,13 +53,33 @@ exports.category_detail = function(req, res, next) {
 
 //Display Category create form on GET.
 exports.category_create_get = function(req, res) {
-    res.send('NI');
+    res.render('category_form', {title: 'Create Instrument Family'});
 };
 
 //Handle Category create on POST.
-exports.category_create_post = function(req, res) {
-    res.send('NI');
-};
+exports.category_create_post = [
+    validator.body('name', 'Category name required').trim().isLength({min: 1}),
+    validator.body('description').optional({checkFalsy: true}),
+    validator.sanitizeBody('name').escape(),
+    validator.sanitizeBody('description').escape(),
+
+    (req, res, next) => {
+        const errors = validator.validationResult(req);
+        if (!errors.isEmpty()) {
+            res.render('category_form', {title: 'Create Instrument Family', category: req.body, errors: errors.array()});
+            return;
+        } else {
+            let category = new Category({
+                name: req.body.name,
+                description: req.body.description
+            });
+            category.save(function(err) {
+                if (err) { return next(err); }
+                res.redirect(category.url);
+            })
+        }
+    }
+];
 
 //Display Category delete form on GET.
 exports.category_delete_get = function(req, res) {

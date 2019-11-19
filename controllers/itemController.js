@@ -72,13 +72,22 @@ exports.item_create_post = [
 ];
 
 //Display Item delete form on GET.
-exports.item_delete_get = function(req, res) {
-    res.send('NI');
+exports.item_delete_get = function(req, res, next) {
+    Item.findById(req.params.id, (err, item) => {
+        if (err) { return next(err); }
+        if (item===null) {
+            res.redirect('/inventory/items');
+        }
+        res.render('item_delete', {title: 'Delete Item', item: item});
+    });
 };
 
 //Handle Item delete on POST.
-exports.item_delete_post = function(req, res) {
-    res.send('NI');
+exports.item_delete_post = function(req, res, next) {
+    Item.findByIdAndDelete(req.body.itemid, (err) => {
+        if (err) { return next(err); }
+        res.redirect('/inventory/items');
+    });
 };
 
 //Display Item update form on GET.

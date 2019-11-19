@@ -3,8 +3,14 @@ extends layout
 block content 
     h1= title 
 
-    p #[strong Description:] #{item.description} 
-    p #[strong Category:] 
-        a(href=item.category.url) #{item.category.name}
-    p #[strong Price:] #{item.price} 
-    p #[strong Number in Stock:] #{item.stock}    
+    div(style='margin-left:20px; margin-top:20px') 
+
+        p #[strong Description:] #{item.description} 
+        p #[strong Category:] 
+            a(href=item.category.url) #{item.category.name}
+        p #[strong Price:] #{item.price} 
+        p #[strong Number in Stock:] #{item.stock}    
+
+    hr 
+    p 
+        a(href=item.url+'/delete') Delete Item

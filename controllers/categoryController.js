@@ -82,13 +82,44 @@ exports.category_create_post = [
 ];
 
 //Display Category delete form on GET.
-exports.category_delete_get = function(req, res) {
-    res.send('NI');
+exports.category_delete_get = function(req, res, next) {
+    async.parallel({
+        category: function(callback) {
+            Category.findById(req.params.id).exec(callback)
+        }, 
+        category_items: function(callback) {
+            Item.find({'category': req.params.id}).exec(callback)
+        }
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.category===null) {
+            res.redirect('/inventory/categories'); 
+        }
+        res.render('category_delete', {title: 'Delete Category', category: results.category, category_items: results.category_items});
+    });
 };
 
 //Handle Category delete on POST.
-exports.category_delete_post = function(req, res) {
-    res.send('NI');
+exports.category_delete_post = function(req, res, next) {
+    async.parallel({
+        category: function(callback) {
+            Category.findById(req.body.categoryid).exec(callback)
+        }, 
+        category_items: function(callback) {
+            Item.find({'category': req.body.categoryid}).exec(callback)
+        }
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.category_items.length > 0) {
+            res.render('category_delete', {title: 'Delete Category', category: results.category, category_items: results.category_items});
+            return;
+        } else {
+            Category.findByIdAndDelete(req.body.categoryid, (err) => {
+                if (err) { return next(err); }
+                res.redirect('/inventory/categories');
+            });
+        }
+    });
 };
 
 //Display Category update form on GET.

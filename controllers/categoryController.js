@@ -64,15 +64,15 @@ exports.category_create_post = [
     validator.sanitizeBody('description').escape(),
 
     (req, res, next) => {
+        let category = new Category({
+            name: req.body.name,
+            description: req.body.description
+        });
         const errors = validator.validationResult(req);
         if (!errors.isEmpty()) {
-            res.render('category_form', {title: 'Create Instrument Family', category: req.body, errors: errors.array()});
+            res.render('category_form', {title: 'Create Instrument Family', category: category, errors: errors.array()});
             return;
         } else {
-            let category = new Category({
-                name: req.body.name,
-                description: req.body.description
-            });
             category.save(function(err) {
                 if (err) { return next(err); }
                 res.redirect(category.url);
@@ -123,11 +123,39 @@ exports.category_delete_post = function(req, res, next) {
 };
 
 //Display Category update form on GET.
-exports.category_update_get = function(req, res) {
-    res.send('NI');
+exports.category_update_get = function(req, res, next) {
+    Category.findById(req.params.id, function(err, category) {
+        if (err) { return next(err); }
+        if (category===null) {
+            let error = new Error("Category not found");
+            error.status = 404;
+            return next(error);
+        }
+        res.render('category_form', {title: 'Update Category', category: category});
+    });
 };
 
 //Handle Category update on POST.
-exports.category_update_post = function(req, res) {
-    res.send('NI');
-};
+exports.category_update_post = [
+    validator.body('name', 'Category name required').trim().isLength({min: 1}),
+    validator.body('description').optional({checkFalsy: true}),
+    validator.sanitizeBody('name').escape(),
+    validator.sanitizeBody('description').escape(),   
+    
+    (req, res, next) => {
+        let category = new Category({
+            name: req.body.name,
+            description: req.body.description,
+            _id:req.params.id
+        });
+        const errors = validator.validationResult(req);
+        if (!errors.isEmpty()) {
+            res.render('category_form', {title: 'Update Category', category: category, errors: errors.array()});
+        } else {
+            Category.findByIdAndUpdate(req.params.id, category, {}, function(err, theCategory) {
+                if (err) { return next(err); }
+                res.redirect(theCategory.url);
+            });
+        }
+    }
+];

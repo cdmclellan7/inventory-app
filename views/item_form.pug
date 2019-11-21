@@ -14,7 +14,13 @@ block content
             select#category.form-control(type='select' placeholder='Select a Category' name='category' required='true')
                 for category in categories
                     if item 
-                        option(value=category._id selected=(category._id.toString()===item.category) ? 'selected': false) #{category.name}
+                        option(
+                            value=category._id 
+                            selected=(
+                                category._id.toString()==item.category._id 
+                                || category._id.toString()==item.category 
+                            )
+                        ) #{category.name} 
                     else 
                         option(value=category._id) #{category.name}
         div.form-group 
